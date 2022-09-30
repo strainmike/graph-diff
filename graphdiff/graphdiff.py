@@ -3,146 +3,36 @@
 This module generates a diff between two graphs.
 """
 
-import pydot
 
-
-class Edge(object):
+def add_diff_to_graph(initial, other):
+    """ Adds a diff to the initial graph passed in diffing it from the other graph
     """
-    Represent an edge in the graph.
-    """
+    removed_nodes_names = set(initial.obj_dict["nodes"].keys()) - set(other.obj_dict["nodes"].keys())
+    for removed_node_name in removed_nodes_names:
+        initial.get_node(removed_node_name)[0].set_color("red")
+    added_nodes_names = set(other.obj_dict["nodes"].keys()) - set(initial.obj_dict["nodes"].keys())
+    for added_node_name in added_nodes_names:
+        added_node = other.get_node(added_node_name)[0]
+        added_node.set_color("green")
+        initial.add_node(added_node)
 
-    def __init__(self, src, dest, label=None):
-        self.src = src
-        self.dest = dest
-        if not label:
-            self.label = ""
-        else:
-            self.label = label
-
-    def __eq__(self, other):
-        return self.src == other.src and self.dest == other.dest and self.label == self.label
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __repr__(self):
-        return "(" + self.src + ", " + self.dest + ")"
-
-    def __hash__(self):
-        return hash((self.src, self.dest, self.label))
-
-
-class Graph(object):
-    """
-    Represents a graph.
-    """
-
-    def __init__(self, edges=None, nodes=None):
-        if not edges:
-            self.edges = set()
-        else:
-            self.edges = edges
-        if not nodes:
-            self.nodes = set()
-        else:
-            self.nodes = nodes
-
-    def add_edge(self, edge):
-        """Adds an edge to the graph."""
-        self.edges.add(edge)
-
-    def clear_edges(self):
-        """Clears all the edges from the graph."""
-        self.edges = set()
-
-    def add_node(self, node):
-        """Adds a node to graph."""
-        self.nodes.add(node)
-
-    def clear_nodes(self):
-        """Clears all the nodes from the graph."""
-        self.nodes = set()
-
-
-def generate_diff_graph(first_graph, second_graph):
-    """Generates diff from two graph."""
-    # generate nodes
-    removed_nodes = set(first_graph.nodes) - set(second_graph.nodes)
-    added_nodes = set(second_graph.nodes) - set(first_graph.nodes)
-    nodes = set(second_graph.nodes) & set(first_graph.nodes)
-
-    removed_edges = first_graph.edges - second_graph.edges
+    removed_edges = set(initial.obj_dict["edges"].keys()) - set(other.obj_dict["edges"].keys())
     for removed_edge in removed_edges:
-        if removed_edge.src in removed_nodes:
-            removed_edge.src = "-" + removed_edge.src
-        if removed_edge.dest in removed_nodes:
-            removed_edge.dest = "-" + removed_edge.dest
-
-    added_edges = second_graph.edges - first_graph.edges
+        initial.get_edge(removed_edge)[0].set_color("red")
+    added_edges = set(other.obj_dict["edges"].keys()) - set(initial.obj_dict["edges"].keys())
     for added_edge in added_edges:
-        if added_edge.src in added_nodes:
-            added_edge.src = "+" + added_edge.src
-        if added_edge.dest in added_nodes:
-            added_edge.dest = "+" + added_edge.dest
-    edges = second_graph.edges & first_graph.edges
+        edge = other.get_edge(added_edge)[0]
+        edge.set_color("green")
+        initial.add_edge(edge)
 
-    graph = Graph()
-    for removed_node in removed_nodes:
-        graph.nodes.add("-" + removed_node)
-    for added_node in added_nodes:
-        graph.nodes.add("+" + added_node)
-    for node in nodes:
-        graph.nodes.add(node)
-
-    for removed_edge in removed_edges:
-        graph.edges.add(Edge(removed_edge.src, removed_edge.dest, "-" + removed_edge.label))
-    for added_edge in added_edges:
-        graph.edges.add(Edge(added_edge.src, added_edge.dest, "+" + added_edge.label))
-    for edge in edges:
-        graph.edges.add(edge)
-
-    return graph
-
-
-def remove_quotes(pydot_graph):
-    """ For some reason, some pydot graph data is with quotes ('"name"', '"label"').
-    This function removes it."""
-
-    for node in pydot_graph.get_nodes():
-        node.set_label(node.get_label().replace('"', ''))
-
-    for edge in pydot_graph.get_edges():
-        if edge.get_label():
-            edge.set_label(edge.get_label().replace('"', ''))
-
-def from_dot(pydot_graph):
-    """Generated a graph from pydot graph."""
-    remove_quotes(pydot_graph)
-    graph = Graph()
-
-    for node in pydot_graph.get_nodes():
-        graph.nodes.add(node.get_label())
-
-    for edge in pydot_graph.get_edges():
-        source_label = edge.get_source()
-        source_nodes = pydot_graph.get_node(source_label)
-        if source_nodes:
-            source_label = source_nodes[0].get_label()
-        dest_label = edge.get_destination()
-        dest_nodes = pydot_graph.get_node(dest_label)
-        if dest_nodes:
-            dest_label = dest_nodes[0].get_label()
-        graph.edges.add(Edge(source_label, dest_label, edge.get_label()))
-        graph.nodes.add(source_label)
-        graph.nodes.add(dest_label)
-    return graph
-
-
-def to_dot(graph):
-    """Generated a pydot graph from graph."""
-    pydot_graph = pydot.Dot(graph_type='graph')
-    for edge in graph.edges:
-        pydot_graph.add_edge(pydot.Edge(edge.src, edge.dest, label=edge.label))
-    for node in graph.nodes:
-        pydot_graph.add_node(pydot.Node(node))
-    return pydot_graph
+    same_subgraphs = set(initial.obj_dict["subgraphs"].keys()) & set(other.obj_dict["subgraphs"].keys())
+    for subgraph in same_subgraphs:
+        add_diff_to_graph(initial.get_subgraph(subgraph)[0], other.get_subgraph(subgraph)[0])
+    removed_subgraphs = set(initial.obj_dict["subgraphs"].keys()) - set(other.obj_dict["subgraphs"].keys())
+    for removed_subgraph in removed_subgraphs:
+        initial.get_subgraph(removed_subgraph)[0].set_bgcolor("red")
+    added_subgraphs = set(other.obj_dict["subgraphs"].keys()) - set(initial.obj_dict["subgraphs"].keys())
+    for added_subgraph in added_subgraphs:
+        other_subgraph = other.get_subgraph(added_subgraph)[0]
+        other_subgraph.set_bgcolor("green")
+        initial.add_subgraph(other_subgraph)
