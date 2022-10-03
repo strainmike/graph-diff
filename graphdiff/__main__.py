@@ -9,7 +9,8 @@ def load_graph(path):
     '''
     Loads a graph from .dot file into a Graph() object.
     '''
-    data = diagram.get_dot_graph(path).source
+    with open(path) as f:
+        data = f.read()
     # TODO: handle multiple graphs
     pydot_graph = pydot.graph_from_dot_data(data)[0]
     return pydot_graph
