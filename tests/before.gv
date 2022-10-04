@@ -1,0 +1,92 @@
+digraph G {
+	node [rankdir=LR shape=record]
+	127 -> 196
+	82 -> 307
+	subgraph cluster3 {
+		node [shape=record]
+		label=Diagram
+		196 [label=FPTerminal]
+		82 [label=FPTerminal]
+		subgraph cluster224 {
+			label=WhileLoop rankdir=LR
+			195 -> 116
+			159 -> 126
+			306 -> 146
+			242 -> 132
+			271 -> 245
+			subgraph cluster232 {
+				node [shape=record]
+				label=Diagram
+				138 [label=UnknownNode]
+				195 [label=FPTerminal]
+				subgraph cluster90 {
+					label=CaseStructure rankdir=LR
+					254 -> 157
+					129 -> 258
+					144 -> 261
+					subgraph cluster100 {
+						node [shape=record]
+						label=Diagram
+						subgraph cluster234 {
+							fillcolor=lightyellow label=Primitive rankdir=LR style="filled,solid"
+							254 [label=Output]
+							258 [label=Parameter]
+							261 [label=Parameter]
+						}
+					}
+					180 -> 158
+					145 -> 186
+					131 -> 183
+					subgraph cluster106 {
+						node [shape=record]
+						label=Diagram
+						subgraph cluster154 {
+							fillcolor=lightyellow label=Primitive rankdir=LR style="filled,solid"
+							180 [label=Output]
+							183 [label=Parameter]
+							186 [label=Parameter]
+						}
+					}
+					subgraph cluster112 {
+						label=CaseSelect rankdir=LR
+						114 [label=Terminal shape=point]
+						115 [label=Terminal shape=point]
+						116 [label=Terminal shape=point]
+					}
+					subgraph cluster125 {
+						label=SelectTunnel rankdir=LR
+						129 [label=Terminal shape=point]
+						131 [label=Terminal shape=point]
+						132 [label=Terminal shape=point]
+					}
+					subgraph cluster142 {
+						label=SelectTunnel rankdir=LR
+						144 [label=Terminal shape=point]
+						145 [label=Terminal shape=point]
+						146 [label=Terminal shape=point]
+					}
+					subgraph cluster155 {
+						label=SelectTunnel rankdir=LR
+						157 [label=Terminal shape=point]
+						158 [label=Terminal shape=point]
+						159 [label=Terminal shape=point]
+					}
+				}
+				133 [label="Some Comment" fillcolor=lightyellow style="filled,solid"]
+				271 [label=Constant]
+				245 [label=LoopTest]
+				242 [label=LoopCount]
+			}
+			subgraph cluster304 {
+				label=LoopTunnel rankdir=LR
+				306 [label=Terminal shape=point]
+				307 [label=Terminal shape=point]
+			}
+			subgraph cluster124 {
+				label=LoopTunnel rankdir=LR
+				126 [label=Terminal shape=point]
+				127 [label=Terminal shape=point]
+			}
+		}
+	}
+}
