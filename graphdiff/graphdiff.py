@@ -79,6 +79,14 @@ def _find_node_by_name(graph, name):
     return None
 
 
+def _delete_node_and_connections(graph, node_name):
+    graph.del_node(node_name)
+    for edge in _get_edges_within_all_subgraphs(graph, node_name):
+        graph.del_edge(edge.get_source(), edge.get_destination())
+    for subgraph in graph.get_subgraphs():
+        _delete_node_and_connections(subgraph, node_name)
+
+
 def _visit_breadth_till_depth_and_add_to_set(graph, source_node, nodes_visited, depth, add_cluster=True):
     nodes_visited.add(source_node)
     if depth == 0:
@@ -117,7 +125,8 @@ def _mark_nodes_at_distance_invisible(graph, changed_nodes, distance=5, add_clus
         if not invisible_nodes:
             break
     for node in invisible_nodes:
-        node_obj = _find_node_by_name(graph, node)
-        if not isinstance(node_obj, pydot.Graph):
-            node_obj.set_style("invis")  # could maybe just kill the nodes?
+        # node_obj = _find_node_by_name(graph, node)
+        _delete_node_and_connections(graph, node)
+            # node_obj.set_style("invis")  # could maybe just kill the nodes?
+
     # TODO need to make their edges invis also....

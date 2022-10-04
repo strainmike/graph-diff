@@ -12,10 +12,18 @@ this_dir = os.path.dirname(os.path.realpath(__file__))
     # graphdiff.add_diff_to_graph(before, after, changed_nodes)
     # print(before)
 
-def test_diff_distance():
+# def test_diff_distance():
+    # before = pydot.graph_from_dot_file(os.path.join(this_dir,"t-before.gv"))[0]
+    # after = pydot.graph_from_dot_file(os.path.join(this_dir,"t-after.gv"))[0]
+    # changed_nodes = set()
+    # graphdiff.add_diff_to_graph(before, after, changed_nodes)
+    # _mark_nodes_at_distance_invisible(before, changed_nodes, distance=1)
+    # print(before)
+
+def test_diff_distance_with_clusters():
     before = pydot.graph_from_dot_file(os.path.join(this_dir,"before.gv"))[0]
     after = pydot.graph_from_dot_file(os.path.join(this_dir,"after.gv"))[0]
     changed_nodes = set()
     graphdiff.add_diff_to_graph(before, after, changed_nodes)
-    _mark_nodes_at_distance_invisible(before, changed_nodes)
-    # print(before)
+    _mark_nodes_at_distance_invisible(before, changed_nodes, distance=1)
+    print(before)
