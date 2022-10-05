@@ -7,7 +7,6 @@ import pydot
 def _add_all_sub_nodes(subgraph, nodes):
     for node in subgraph.get_nodes():
         nodes.add(node.get_name())
-        print(node) # get_nodes makes new nodes every times its called, wtf
     for graph in subgraph.get_subgraphs():
         _add_all_sub_nodes(graph, nodes)
 
@@ -79,6 +78,17 @@ def _find_node_by_name(graph, name):
     return None
 
 
+def _find_subgraph_containing_node_by_name(graph, name):
+    node = graph.get_node(name)
+    if node:
+        return graph
+    for subgraph in graph.get_subgraphs():
+        graph = _find_subgraph_containing_node_by_name(subgraph, name)
+        if graph:
+            return graph
+    return None
+
+
 def _delete_node_and_connections(graph, node_name):
     graph.del_node(node_name)
     for edge in _get_edges_within_all_subgraphs(graph, node_name):
@@ -87,46 +97,36 @@ def _delete_node_and_connections(graph, node_name):
         _delete_node_and_connections(subgraph, node_name)
 
 
-def _visit_breadth_till_depth_and_add_to_set(graph, source_node, nodes_visited, depth, add_cluster=True):
+def _visit_breadth_till_depth_and_add_to_set(graph, source_node, nodes_visited, depth, add_cluster_context=True):
     nodes_visited.add(source_node)
     if depth == 0:
         return
     nodes_to_visit = set()
     for edge in _get_edges_within_all_subgraphs(graph, source_node):
-        print("in loop")
         nodes_to_visit.add(edge.get_source())
         nodes_to_visit.add(edge.get_destination())
-    # if add_cluster:
-        # node = _find_node_by_name(graph, source_node)
-        # cluster = node.get_parent_graph()
-        # if cluster.get_name() != graph.get_name():
-            # for node in cluster.get_nodes():
+    if add_cluster_context:
+        cluster = _find_subgraph_containing_node_by_name(graph, source_node)
+        if cluster.get_name() != graph.get_name():
+            for node in cluster.get_nodes():
+                nodes_to_visit.add(node.get_name())
+            # for cluster in cluster.get_subgraphs():
                 # nodes_to_visit.add(node)
-            # for cluster in cluster.get_clusters():
-                # nodes_to_visit.add(node)
-
     nodes_to_visit -= nodes_visited
     for node in nodes_to_visit:
         _visit_breadth_till_depth_and_add_to_set(graph, node, nodes_visited, depth - 1)
 
 
-def _mark_nodes_at_distance_invisible(graph, changed_nodes, distance=5, add_cluster=True):
+def _mark_nodes_at_distance_invisible(graph, changed_nodes, distance=5, add_cluster_context=True):
     invisible_nodes = set()
     _add_all_sub_nodes(graph, invisible_nodes)
-    print(invisible_nodes)
     invisible_nodes -= changed_nodes
-    print(invisible_nodes)
-    print(changed_nodes)
     for node in changed_nodes:
         nodes_to_make_visisble = set()
-        _visit_breadth_till_depth_and_add_to_set(graph, node, nodes_to_make_visisble, distance, add_cluster)
-        print(nodes_to_make_visisble)
+        _visit_breadth_till_depth_and_add_to_set(graph, node, nodes_to_make_visisble, distance, add_cluster_context)
         invisible_nodes -= nodes_to_make_visisble
         if not invisible_nodes:
             break
     for node in invisible_nodes:
         # node_obj = _find_node_by_name(graph, node)
         _delete_node_and_connections(graph, node)
-            # node_obj.set_style("invis")  # could maybe just kill the nodes?
-
-    # TODO need to make their edges invis also....

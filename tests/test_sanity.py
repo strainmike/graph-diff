@@ -25,5 +25,5 @@ def test_diff_distance_with_clusters():
     after = pydot.graph_from_dot_file(os.path.join(this_dir,"after.gv"))[0]
     changed_nodes = set()
     graphdiff.add_diff_to_graph(before, after, changed_nodes)
-    _mark_nodes_at_distance_invisible(before, changed_nodes, distance=1)
+    _mark_nodes_at_distance_invisible(before, changed_nodes, distance=2)
     print(before)
